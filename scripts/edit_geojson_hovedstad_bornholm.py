@@ -12,7 +12,7 @@ GAP_BORNHOLM_ABOVE_COPY = 0.20  # Lodret afstand mellem forstørret Hovedstaden 
 EXTRA_EAST_SHIFT = 0.45  # Ekstra forskydning mod øst for kopien af hovedstadskommunerne.
 EXTRA_NORTH_SHIFT = 0.75  # Ekstra forskydning mod nord for at undgå overlap med Nordsjælland.
 FRAME_PADDING = 0.08  # Margin mellem geometri og ramme.
-FRAME_BORDER_THICKNESS = 0.01  # Tykkelse på den polygon-baserede ramme.
+FRAME_BORDER_THICKNESS = 0.003  # Tykkelse på den polygon-baserede ramme.
 
 # Brugerdefinerede hovedstadskommuner med ÆØÅ i navneformen.
 CAPITAL_MUNICIPALITY_NAMES = {
@@ -44,6 +44,11 @@ BORNHOLM_NAME_VALUES = {
 
 NAME_KEYS = ["label_dk", "navn", "kommune", "municipality", "name"]
 
+MANUAL_NAME_FIXES = {
+    "nordfyns": "Nordfyn",
+    "vesthimmerlands": "Vesthimmerland",
+}
+
 
 def normalize_text(value: str) -> str:
     txt = (value or "").strip().lower()
@@ -58,6 +63,37 @@ def normalize_text(value: str) -> str:
 
 CAPITAL_MUNICIPALITIES = {normalize_text(name) for name in CAPITAL_MUNICIPALITY_NAMES}
 BORNHOLM_NAMES = {normalize_text(name) for name in BORNHOLM_NAME_VALUES}
+
+
+def apply_manual_name_fixes(feature: dict) -> None:
+    props = feature.get("properties") or {}
+    source_value = ""
+    source_key = ""
+
+    for key in NAME_KEYS:
+        if props.get(key):
+            source_key = key
+            source_value = str(props[key])
+            break
+
+    if not source_value:
+        return
+
+    fixed = MANUAL_NAME_FIXES.get(normalize_text(source_value))
+    if not fixed:
+        return
+
+    props[source_key] = fixed
+    if "label_dk" in props:
+        props["label_dk"] = fixed
+    if "navn" in props:
+        props["navn"] = fixed
+    if "kommune" in props:
+        props["kommune"] = fixed
+    if "name" in props:
+        props["name"] = fixed
+    if "label_en" in props:
+        props["label_en"] = fixed
 
 
 def get_feature_name(feature: dict) -> str:
@@ -199,6 +235,8 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
         raise ValueError("Input must be a GeoJSON FeatureCollection.")
 
     original_features = data["features"]
+    for feature in original_features:
+        apply_manual_name_fixes(feature)
 
     capital_features = [f for f in original_features if is_capital_feature(f)]
     bornholm_features = [f for f in original_features if is_bornholm_feature(f)]
