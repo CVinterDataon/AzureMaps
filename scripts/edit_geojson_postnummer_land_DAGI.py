@@ -5,6 +5,35 @@ from pathlib import Path
 import geopandas as gpd
 
 
+def strip_z_from_coordinates(coords):
+    if isinstance(coords, list) and coords:
+        if isinstance(coords[0], (int, float)):
+            return coords[:2]
+        return [strip_z_from_coordinates(item) for item in coords]
+    return coords
+
+
+def strip_z_from_feature_collection(geojson_obj: dict) -> int:
+    stripped = 0
+    for feature in geojson_obj.get("features", []):
+        geometry = feature.get("geometry") or {}
+        coords = geometry.get("coordinates")
+        if coords is None:
+            continue
+
+        def count_3d(c):
+            if isinstance(c, list) and c:
+                if isinstance(c[0], (int, float)):
+                    return 1 if len(c) >= 3 else 0
+                return sum(count_3d(v) for v in c)
+            return 0
+
+        stripped += count_3d(coords)
+        geometry["coordinates"] = strip_z_from_coordinates(coords)
+
+    return stripped
+
+
 def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolerance: float) -> None:
     if str(input_path) == "dagi.gpkg":
         # Requested baseline example.
@@ -27,6 +56,7 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
 
     geojson_obj = json.loads(gdf.to_json(drop_id=True))
     geojson_obj.pop("crs", None)
+    stripped_count = strip_z_from_feature_collection(geojson_obj)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as outfile:
@@ -34,6 +64,7 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
         outfile.write("\n")
 
     print(f"Input rows: {len(gdf)}")
+    print(f"Stripped 3D coordinate tuples: {stripped_count}")
     print(f"Output written to: {output_path}")
 
 
