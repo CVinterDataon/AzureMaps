@@ -6,13 +6,13 @@ from pathlib import Path
 from typing import Iterable
 
 
-SCALE = 3.0  # Skaleringsfaktor for kopien af hovedstadskommunerne.
-GAP_NORTH_OF_CAPITAL = 0.20  # Lodret afstand mellem original Hovedstaden og den forstørrede kopi.
+SCALE = 2.4  # Skaleringsfaktor for kopien af hovedstadskommunerne.
+GAP_NORTH_OF_CAPITAL = -0.4  # Lodret afstand mellem original Hovedstaden og den forstørrede kopi.
 GAP_BORNHOLM_ABOVE_COPY = 0.20  # Lodret afstand mellem forstørret Hovedstaden og flyttet Bornholm.
 EXTRA_EAST_SHIFT = 0.45  # Ekstra forskydning mod øst for kopien af hovedstadskommunerne.
 EXTRA_NORTH_SHIFT = 0.75  # Ekstra forskydning mod nord for at undgå overlap med Nordsjælland.
 FRAME_PADDING = 0.08  # Margin mellem geometri og ramme.
-FRAME_BORDER_THICKNESS = 0.02  # Tykkelse på den polygon-baserede ramme.
+FRAME_BORDER_THICKNESS = 0.01  # Tykkelse på den polygon-baserede ramme.
 
 # Brugerdefinerede hovedstadskommuner med ÆØÅ i navneformen.
 CAPITAL_MUNICIPALITY_NAMES = {
@@ -255,7 +255,7 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
         "Ramme - Forstørret Hovedstad",
         "capital_copy",
     )
-    data["features"].append(copied_frame)
+    frame_features = [copied_frame]
 
     if moved_bornholm_features:
         bh_box = bbox_of_features(moved_bornholm_features)
@@ -267,9 +267,10 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
             "Ramme - Bornholm",
             "bornholm",
         )
-        data["features"].append(bornholm_frame)
+        frame_features.append(bornholm_frame)
 
     data["features"].extend(copied_capital_features)
+    data["features"].extend(frame_features)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as outfile:
