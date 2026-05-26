@@ -10,6 +10,7 @@ SCALE = 3.0
 GAP_NORTH_OF_CAPITAL = 0.20
 GAP_BORNHOLM_ABOVE_COPY = 0.20
 EXTRA_EAST_SHIFT = 0.45
+EXTRA_NORTH_SHIFT = 0.75
 FRAME_PADDING = 0.08
 
 # User-defined capital municipalities (including common spelling variants).
@@ -159,8 +160,8 @@ def make_bbox_frame_feature(min_x: float, min_y: float, max_x: float, max_y: flo
             "frame_type": frame_type,
         },
         "geometry": {
-            "type": "Polygon",
-            "coordinates": [ring],
+            "type": "LineString",
+            "coordinates": ring,
         },
     }
 
@@ -173,13 +174,6 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
         raise ValueError("Input must be a GeoJSON FeatureCollection.")
 
     original_features = data["features"]
-
-    # This script is intentionally restricted to municipality GeoJSON files.
-    if any(isinstance((f.get("properties") or {}), dict) and "postnummer" in (f.get("properties") or {}) for f in original_features):
-        raise ValueError(
-            "Input appears to be a postcode dataset (contains 'postnummer'). "
-            "Use a municipality dataset such as data/input/kommuneinddeling.geojson."
-        )
 
     capital_features = [f for f in original_features if is_capital_feature(f)]
     bornholm_features = [f for f in original_features if is_bornholm_feature(f)]
@@ -198,7 +192,7 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
     scaled_center_x = (scaled_min_x + scaled_max_x) / 2.0
 
     dx_copy = source_center_x - scaled_center_x + EXTRA_EAST_SHIFT
-    dy_copy = (cap_ymax + GAP_NORTH_OF_CAPITAL) - scaled_min_y
+    dy_copy = (cap_ymax + GAP_NORTH_OF_CAPITAL + EXTRA_NORTH_SHIFT) - scaled_min_y
 
     copied_capital_features = []
     for feature in capital_features:
