@@ -5,10 +5,6 @@ from pathlib import Path
 import geopandas as gpd
 
 
-EXCLUDE_POSTNUMMER_MIN = 1000
-EXCLUDE_POSTNUMMER_MAX = 1499
-
-
 def strip_z_from_coordinates(coords):
     if isinstance(coords, list) and coords:
         if isinstance(coords[0], (int, float)):
@@ -38,17 +34,17 @@ def strip_z_from_feature_collection(geojson_obj: dict) -> int:
     return stripped
 
 
-def postnummer_in_excluded_range(value) -> bool:
+def postnummer_is_non_standard_or_range(value) -> bool:
     txt = str(value or "").strip()
     if not txt:
-        return False
+        return True
 
-    try:
-        num = int(txt)
-    except ValueError:
-        return False
+    # Range values such as "1000-1499" should be excluded.
+    if "-" in txt:
+        return True
 
-    return EXCLUDE_POSTNUMMER_MIN <= num <= EXCLUDE_POSTNUMMER_MAX
+    # Keep only standard 4-digit postnummer values.
+    return not (txt.isdigit() and len(txt) == 4)
 
 
 def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolerance: float) -> None:
@@ -69,8 +65,8 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
 
     original_rows = len(gdf)
     if "postnummer" in gdf.columns:
-        gdf = gdf[~gdf["postnummer"].apply(postnummer_in_excluded_range)]
-    removed_by_postnummer_range = original_rows - len(gdf)
+        gdf = gdf[~gdf["postnummer"].apply(postnummer_is_non_standard_or_range)]
+    removed_non_standard_or_range = original_rows - len(gdf)
 
     keep_columns = [col for col in ["postnummer", "navn", "geometry"] if col in gdf.columns]
     if keep_columns:
@@ -86,10 +82,7 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
         outfile.write("\n")
 
     print(f"Input rows: {original_rows}")
-    print(
-        f"Removed rows (postnummer {EXCLUDE_POSTNUMMER_MIN}-{EXCLUDE_POSTNUMMER_MAX}): "
-        f"{removed_by_postnummer_range}"
-    )
+    print(f"Removed rows (range/non-standard postnummer): {removed_non_standard_or_range}")
     print(f"Output rows: {len(gdf)}")
     print(f"Stripped 3D coordinate tuples: {stripped_count}")
     print(f"Output written to: {output_path}")
