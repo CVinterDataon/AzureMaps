@@ -19,3 +19,14 @@ python scripts/edit_geojson.py data/input/sample.geojson data/output/sample_out.
 ```
 
 Scriptet validerer, at input er en GeoJSON `FeatureCollection`, og skriver derefter filen ud igen i formatteret JSON.
+
+## Fjern hav-arealer fra postnumre
+
+Scriptet `scripts/edit_geojson_postnummer_land.py` klipper postnummergeometrier med kommunegeometrier som landmaske.
+Det fjerner de store udtræk i havet, som ellers kan give unaturlige polygoner.
+
+Eksempel:
+
+```powershell
+python scripts/edit_geojson_postnummer_land.py --input data/input/postnummerinddeling.geojson --land-mask data/input/kommuneinddeling.geojson --output data/output/postnummerinddeling_land.geojson
+```

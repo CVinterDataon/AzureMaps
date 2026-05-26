@@ -1,1 +1,2 @@
-# No third-party dependencies required initially.
+# Geometry operations for clipping sea areas from GeoJSON polygons.
+shapely>=2.0,<3
