@@ -12,7 +12,7 @@ GAP_BORNHOLM_ABOVE_COPY = 0.20
 EXTRA_EAST_SHIFT = 0.45
 EXTRA_NORTH_SHIFT = 0.75
 FRAME_PADDING = 0.08
-FRAME_STROKE_WIDTH = 1
+FRAME_BORDER_THICKNESS = 0.02
 
 # User-defined capital municipalities (including common spelling variants).
 CAPITAL_MUNICIPALITIES = {
@@ -144,13 +144,32 @@ def move_geometry(geometry: dict, dx: float, dy: float) -> None:
 
 
 def make_bbox_frame_feature(min_x: float, min_y: float, max_x: float, max_y: float, name: str, frame_type: str) -> dict:
-    ring = [
+    outer_ring = [
         [min_x, min_y],
         [max_x, min_y],
         [max_x, max_y],
         [min_x, max_y],
         [min_x, min_y],
     ]
+
+    inner_min_x = min_x + FRAME_BORDER_THICKNESS
+    inner_min_y = min_y + FRAME_BORDER_THICKNESS
+    inner_max_x = max_x - FRAME_BORDER_THICKNESS
+    inner_max_y = max_y - FRAME_BORDER_THICKNESS
+
+    if inner_min_x >= inner_max_x or inner_min_y >= inner_max_y:
+        # Fallback to a plain polygon if bbox is too small for a ring.
+        coordinates = [outer_ring]
+    else:
+        inner_ring = [
+            [inner_min_x, inner_min_y],
+            [inner_min_x, inner_max_y],
+            [inner_max_x, inner_max_y],
+            [inner_max_x, inner_min_y],
+            [inner_min_x, inner_min_y],
+        ]
+        coordinates = [outer_ring, inner_ring]
+
     return {
         "type": "Feature",
         "properties": {
@@ -159,15 +178,11 @@ def make_bbox_frame_feature(min_x: float, min_y: float, max_x: float, max_y: flo
             "label_en": name,
             "is_frame": True,
             "frame_type": frame_type,
-            "stroke": "#000000",
-            "stroke-width": FRAME_STROKE_WIDTH,
-            "stroke-opacity": 1,
-            "fill": "#000000",
-            "fill-opacity": 0,
+            "frame_visual": "ring_polygon",
         },
         "geometry": {
             "type": "Polygon",
-            "coordinates": [ring],
+            "coordinates": coordinates,
         },
     }
 
