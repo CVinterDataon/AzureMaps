@@ -12,7 +12,6 @@ GAP_BORNHOLM_ABOVE_COPY = 0.20  # Lodret afstand mellem forstørret Hovedstaden 
 EXTRA_EAST_SHIFT = 0.45  # Ekstra forskydning mod øst for kopien af hovedstadskommunerne.
 EXTRA_NORTH_SHIFT = 0.75  # Ekstra forskydning mod nord for at undgå overlap med Nordsjælland.
 FRAME_PADDING = 0.08  # Margin mellem geometri og ramme.
-FRAME_BORDER_THICKNESS = 0.003  # Tykkelse på den polygon-baserede ramme.
 
 # Brugerdefinerede hovedstadskommuner.
 CAPITAL_MUNICIPALITY_NAMES = {
@@ -57,7 +56,6 @@ REGION_BY_CODE = {
     "1081": "Nordjylland",
 }
 
-
 def normalize_text(value: str) -> str:
     txt = (value or "").strip().lower()
     txt = txt.replace("æ", "ae").replace("ø", "oe").replace("å", "aa")
@@ -68,10 +66,8 @@ def normalize_text(value: str) -> str:
             allowed.append(ch)
     return "".join(allowed)
 
-
 CAPITAL_MUNICIPALITIES = {normalize_text(name) for name in CAPITAL_MUNICIPALITY_NAMES}
 BORNHOLM_NAMES = {normalize_text(name) for name in BORNHOLM_NAME_VALUES}
-
 
 def apply_manual_name_fixes(feature: dict) -> None:
     props = feature.get("properties") or {}
@@ -103,7 +99,6 @@ def apply_manual_name_fixes(feature: dict) -> None:
     if "label_en" in props:
         props["label_en"] = fixed
 
-
 def apply_region_name(feature: dict) -> None:
     props = feature.get("properties") or {}
     code = str(props.get("regionskode") or "").strip()
@@ -114,14 +109,12 @@ def apply_region_name(feature: dict) -> None:
     if region_name:
         props["Region"] = region_name
 
-
 def get_feature_name(feature: dict) -> str:
     props = feature.get("properties") or {}
     for key in NAME_KEYS:
         if props.get(key):
             return str(props[key])
     return ""
-
 
 def is_capital_feature(feature: dict) -> bool:
     normalized_name = normalize_text(get_feature_name(feature))
@@ -203,31 +196,15 @@ def move_geometry(geometry: dict, dx: float, dy: float) -> None:
 
 
 def make_bbox_frame_feature(min_x: float, min_y: float, max_x: float, max_y: float, name: str, frame_type: str) -> dict:
-    outer_ring = [
+    # A closed rectangle as a LineString (LinearRing) – lightweight and universally
+    # supported by GeoJSON consumers including Power BI Azure Maps.
+    ring = [
         [min_x, min_y],
         [max_x, min_y],
         [max_x, max_y],
         [min_x, max_y],
         [min_x, min_y],
     ]
-
-    inner_min_x = min_x + FRAME_BORDER_THICKNESS
-    inner_min_y = min_y + FRAME_BORDER_THICKNESS
-    inner_max_x = max_x - FRAME_BORDER_THICKNESS
-    inner_max_y = max_y - FRAME_BORDER_THICKNESS
-
-    if inner_min_x >= inner_max_x or inner_min_y >= inner_max_y:
-        # Fallback to a plain polygon if bbox is too small for a ring.
-        coordinates = [outer_ring]
-    else:
-        inner_ring = [
-            [inner_min_x, inner_min_y],
-            [inner_min_x, inner_max_y],
-            [inner_max_x, inner_max_y],
-            [inner_max_x, inner_min_y],
-            [inner_min_x, inner_min_y],
-        ]
-        coordinates = [outer_ring, inner_ring]
 
     return {
         "type": "Feature",
@@ -237,11 +214,11 @@ def make_bbox_frame_feature(min_x: float, min_y: float, max_x: float, max_y: flo
             "label_en": name,
             "is_frame": True,
             "frame_type": frame_type,
-            "frame_visual": "ring_polygon",
+            "frame_visual": "linestring",
         },
         "geometry": {
-            "type": "Polygon",
-            "coordinates": coordinates,
+            "type": "LineString",
+            "coordinates": ring,
         },
     }
 

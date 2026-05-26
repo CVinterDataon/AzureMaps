@@ -130,6 +130,14 @@ def convert_gpkg_to_geojson(
     gdf, removed_non_land = clip_to_municipality_land(gdf, land_mask_path)
     gdf, removed_duplicates = make_postnumre_unique(gdf)
 
+    # Keep only polygonal geometries (Polygon / MultiPolygon).
+    # After dissolve, some areas can collapse to Points or GeometryCollections.
+    before_poly = len(gdf)
+    gdf = gdf[gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].copy()
+    removed_non_polygon = before_poly - len(gdf)
+    if removed_non_polygon:
+        print(f"Removed non-polygon geometries: {removed_non_polygon}")
+
     keep_columns = [col for col in ["postnummer", "navn", "geometry"] if col in gdf.columns]
     if keep_columns:
         gdf = gdf[keep_columns]
