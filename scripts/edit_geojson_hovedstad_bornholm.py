@@ -6,40 +6,40 @@ from pathlib import Path
 from typing import Iterable
 
 
-SCALE = 3.0
-GAP_NORTH_OF_CAPITAL = 0.20
-GAP_BORNHOLM_ABOVE_COPY = 0.20
-EXTRA_EAST_SHIFT = 0.45
-EXTRA_NORTH_SHIFT = 0.75
-FRAME_PADDING = 0.08
-FRAME_BORDER_THICKNESS = 0.02
+SCALE = 3.0  # Skaleringsfaktor for kopien af hovedstadskommunerne.
+GAP_NORTH_OF_CAPITAL = 0.20  # Lodret afstand mellem original Hovedstaden og den forstørrede kopi.
+GAP_BORNHOLM_ABOVE_COPY = 0.20  # Lodret afstand mellem forstørret Hovedstaden og flyttet Bornholm.
+EXTRA_EAST_SHIFT = 0.45  # Ekstra forskydning mod øst for kopien af hovedstadskommunerne.
+EXTRA_NORTH_SHIFT = 0.75  # Ekstra forskydning mod nord for at undgå overlap med Nordsjælland.
+FRAME_PADDING = 0.08  # Margin mellem geometri og ramme.
+FRAME_BORDER_THICKNESS = 0.02  # Tykkelse på den polygon-baserede ramme.
 
-# User-defined capital municipalities (including common spelling variants).
-CAPITAL_MUNICIPALITIES = {
-    "koebenhavn",
-    "frederiksberg",
-    "dragoer",
-    "taarnby",
-    "gentofte",
-    "lyngby-taarbaek",
-    "lyngby-taarnby",
-    "rudersdal",
-    "hoersholm",
-    "furesoe",
-    "gladsaxe",
-    "herlev",
-    "ballerup",
-    "albertslund",
-    "glostrup",
-    "roedovre",
-    "vallensbaek",
-    "broendby",
-    "hvidovre",
+# Brugerdefinerede hovedstadskommuner med ÆØÅ i navneformen.
+CAPITAL_MUNICIPALITY_NAMES = {
+    "København",
+    "Frederiksberg",
+    "Dragør",
+    "Tårnby",
+    "Gentofte",
+    "Lyngby-Tårbæk",
+    "Rudersdal",
+    "Hørsholm",
+    "Furesø",
+    "Gladsaxe",
+    "Herlev",
+    "Ballerup",
+    "Albertslund",
+    "Glostrup",
+    "Rødovre",
+    "Vallensbæk",
+    "Brøndby",
+    "Hvidovre",
 }
 
-BORNHOLM_NAMES = {
-    "bornholm",
-    "christiansoe",
+# Bornholm-navne med ÆØÅ i navneformen.
+BORNHOLM_NAME_VALUES = {
+    "Bornholm",
+    "Christiansø",
 }
 
 NAME_KEYS = ["label_dk", "navn", "kommune", "municipality", "name"]
@@ -54,6 +54,10 @@ def normalize_text(value: str) -> str:
         if ch.isalnum() or ch in {" ", "-"}:
             allowed.append(ch)
     return "".join(allowed)
+
+
+CAPITAL_MUNICIPALITIES = {normalize_text(name) for name in CAPITAL_MUNICIPALITY_NAMES}
+BORNHOLM_NAMES = {normalize_text(name) for name in BORNHOLM_NAME_VALUES}
 
 
 def get_feature_name(feature: dict) -> str:
