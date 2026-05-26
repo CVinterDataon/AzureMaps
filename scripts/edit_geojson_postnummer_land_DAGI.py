@@ -54,6 +54,12 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
     else:
         gdf = gpd.read_file(input_path)
 
+    if len(gdf) == 0:
+        raise ValueError(
+            f"Input contains 0 rows: {input_path}. "
+            "The selected DAGI file/layer appears empty."
+        )
+
     if gdf.crs is None:
         raise ValueError("Input GeoPackage has no CRS. Cannot reproject safely to EPSG:4326.")
 
@@ -65,7 +71,13 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
 
     original_rows = len(gdf)
     if "postnummer" in gdf.columns:
-        gdf = gdf[~gdf["postnummer"].apply(postnummer_is_non_standard_or_range)]
+        keep_mask = ~gdf["postnummer"].apply(postnummer_is_non_standard_or_range)
+        gdf = gdf.loc[keep_mask].copy()
+
+    # Defensive fallback: some dataframe operations can drop GeoDataFrame typing.
+    if not isinstance(gdf, gpd.GeoDataFrame) and "geometry" in gdf.columns:
+        gdf = gpd.GeoDataFrame(gdf, geometry="geometry", crs="EPSG:4326")
+
     removed_non_standard_or_range = original_rows - len(gdf)
 
     keep_columns = [col for col in ["postnummer", "navn", "geometry"] if col in gdf.columns]
@@ -95,7 +107,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         type=Path,
-        default=Path("data/input/DAGI_V1_Postnummerinddeling_TotalDownload_gpkg_Current_645.gpkg"),
+        default=Path("data/input/DAGI_V2_Postnummerinddeling_500000_TotalDownload_gpkg_Current_118.gpkg"),
         help="Path to DAGI .gpkg input file.",
     )
     parser.add_argument(
