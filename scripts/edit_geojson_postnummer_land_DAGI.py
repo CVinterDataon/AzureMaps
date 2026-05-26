@@ -5,6 +5,10 @@ from pathlib import Path
 import geopandas as gpd
 
 
+EXCLUDE_POSTNUMMER_MIN = 1000
+EXCLUDE_POSTNUMMER_MAX = 1499
+
+
 def strip_z_from_coordinates(coords):
     if isinstance(coords, list) and coords:
         if isinstance(coords[0], (int, float)):
@@ -34,6 +38,19 @@ def strip_z_from_feature_collection(geojson_obj: dict) -> int:
     return stripped
 
 
+def postnummer_in_excluded_range(value) -> bool:
+    txt = str(value or "").strip()
+    if not txt:
+        return False
+
+    try:
+        num = int(txt)
+    except ValueError:
+        return False
+
+    return EXCLUDE_POSTNUMMER_MIN <= num <= EXCLUDE_POSTNUMMER_MAX
+
+
 def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolerance: float) -> None:
     if str(input_path) == "dagi.gpkg":
         # Requested baseline example.
@@ -50,6 +67,11 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
     if simplify_tolerance > 0:
         gdf["geometry"] = gdf.geometry.simplify(simplify_tolerance, preserve_topology=True)
 
+    original_rows = len(gdf)
+    if "postnummer" in gdf.columns:
+        gdf = gdf[~gdf["postnummer"].apply(postnummer_in_excluded_range)]
+    removed_by_postnummer_range = original_rows - len(gdf)
+
     keep_columns = [col for col in ["postnummer", "navn", "geometry"] if col in gdf.columns]
     if keep_columns:
         gdf = gdf[keep_columns]
@@ -63,7 +85,12 @@ def convert_gpkg_to_geojson(input_path: Path, output_path: Path, simplify_tolera
         json.dump(geojson_obj, outfile, ensure_ascii=False, indent=2)
         outfile.write("\n")
 
-    print(f"Input rows: {len(gdf)}")
+    print(f"Input rows: {original_rows}")
+    print(
+        f"Removed rows (postnummer {EXCLUDE_POSTNUMMER_MIN}-{EXCLUDE_POSTNUMMER_MAX}): "
+        f"{removed_by_postnummer_range}"
+    )
+    print(f"Output rows: {len(gdf)}")
     print(f"Stripped 3D coordinate tuples: {stripped_count}")
     print(f"Output written to: {output_path}")
 
