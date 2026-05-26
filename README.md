@@ -22,11 +22,21 @@ Scriptet validerer, at input er en GeoJSON `FeatureCollection`, og skriver deref
 
 ## Fjern hav-arealer fra postnumre
 
-Scriptet `scripts/edit_geojson_postnummer_land.py` klipper postnummergeometrier med kommunegeometrier som landmaske.
+Scriptet `scripts/edit_geojson_postnummer_land_datascience.dk.py` klipper postnummergeometrier med kommunegeometrier som landmaske.
 Det fjerner de store udtræk i havet, som ellers kan give unaturlige polygoner.
 
 Eksempel:
 
 ```powershell
-python scripts/edit_geojson_postnummer_land.py --input data/input/postnummerinddeling.geojson --land-mask data/input/kommuneinddeling.geojson --output data/output/postnummerinddeling_land.geojson
+python scripts/edit_geojson_postnummer_land_datascience.dk.py --input data/input/postnummerinddeling.geojson --land-mask data/input/kommuneinddeling.geojson --output data/output/postnummerinddeling_land.geojson
+```
+
+## Konverter DAGI GPKG til GeoJSON
+
+Scriptet `scripts/edit_geojson_postnummer_land_DAGI.py` laeser DAGI GPKG-filen og gemmer en GeoJSON-fil i `data/output/`.
+
+Eksempel:
+
+```powershell
+python scripts/edit_geojson_postnummer_land_DAGI.py --input data/input/DAGI_V1_Postnummerinddeling_TotalDownload_gpkg_Current_645.gpkg --output data/output/postnummerinddeling_dagi.geojson
 ```
