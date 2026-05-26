@@ -14,7 +14,7 @@ EXTRA_NORTH_SHIFT = 0.75  # Ekstra forskydning mod nord for at undgå overlap me
 FRAME_PADDING = 0.08  # Margin mellem geometri og ramme.
 FRAME_BORDER_THICKNESS = 0.003  # Tykkelse på den polygon-baserede ramme.
 
-# Brugerdefinerede hovedstadskommuner med ÆØÅ i navneformen.
+# Brugerdefinerede hovedstadskommuner.
 CAPITAL_MUNICIPALITY_NAMES = {
     "København",
     "Frederiksberg",
@@ -36,7 +36,7 @@ CAPITAL_MUNICIPALITY_NAMES = {
     "Hvidovre",
 }
 
-# Bornholm-navne med ÆØÅ i navneformen.
+# Bornholm-navne.
 BORNHOLM_NAME_VALUES = {
     "Bornholm",
     "Christiansø",
@@ -47,6 +47,14 @@ NAME_KEYS = ["label_dk", "navn", "kommune", "municipality", "name"]
 MANUAL_NAME_FIXES = {
     "nordfyns": "Nordfyn",
     "vesthimmerlands": "Vesthimmerland",
+}
+
+REGION_BY_CODE = {
+    "1085": "Sjælland",
+    "1084": "Hovedstaden",
+    "1083": "Syddanmark",
+    "1082": "Midtjylland",
+    "1081": "Nordjylland",
 }
 
 
@@ -94,6 +102,17 @@ def apply_manual_name_fixes(feature: dict) -> None:
         props["name"] = fixed
     if "label_en" in props:
         props["label_en"] = fixed
+
+
+def apply_region_name(feature: dict) -> None:
+    props = feature.get("properties") or {}
+    code = str(props.get("regionskode") or "").strip()
+    if not code:
+        return
+
+    region_name = REGION_BY_CODE.get(code)
+    if region_name:
+        props["Region"] = region_name
 
 
 def get_feature_name(feature: dict) -> str:
@@ -237,6 +256,7 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
     original_features = data["features"]
     for feature in original_features:
         apply_manual_name_fixes(feature)
+        apply_region_name(feature)
 
     capital_features = [f for f in original_features if is_capital_feature(f)]
     bornholm_features = [f for f in original_features if is_bornholm_feature(f)]
