@@ -174,6 +174,13 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
 
     original_features = data["features"]
 
+    # This script is intentionally restricted to municipality GeoJSON files.
+    if any(isinstance((f.get("properties") or {}), dict) and "postnummer" in (f.get("properties") or {}) for f in original_features):
+        raise ValueError(
+            "Input appears to be a postcode dataset (contains 'postnummer'). "
+            "Use a municipality dataset such as data/input/kommuneinddeling.geojson."
+        )
+
     capital_features = [f for f in original_features if is_capital_feature(f)]
     bornholm_features = [f for f in original_features if is_bornholm_feature(f)]
 
@@ -261,12 +268,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--input",
-        default=str(Path("data/input/postnummerinddeling.geojson")),
+        default=str(Path("data/input/kommuneinddeling.geojson")),
         help="Input GeoJSON path",
     )
     parser.add_argument(
         "--output",
-        default=str(Path("data/output/postnummerinddeling_hovedstad_bornholm.geojson")),
+        default=str(Path("data/output/kommuneinddeling_hovedstad_bornholm.geojson")),
         help="Output GeoJSON path",
     )
 
