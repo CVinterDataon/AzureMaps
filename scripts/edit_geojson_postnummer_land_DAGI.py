@@ -130,13 +130,30 @@ def convert_gpkg_to_geojson(
     gdf, removed_non_land = clip_to_municipality_land(gdf, land_mask_path)
     gdf, removed_duplicates = make_postnumre_unique(gdf)
 
-    # Keep only polygonal geometries (Polygon / MultiPolygon).
-    # After dissolve, some areas can collapse to Points or GeometryCollections.
+    # Extract only polygonal parts from mixed/GeometryCollection geometries.
+    # Points or lines that appear alongside polygons after dissolve are stripped;
+    # the polygon area itself is preserved.
+    from shapely.geometry import GeometryCollection, MultiPolygon, Polygon
+
+    def extract_polygons(geom):
+        if geom is None or geom.is_empty:
+            return None
+        if isinstance(geom, (Polygon, MultiPolygon)):
+            return geom
+        if isinstance(geom, GeometryCollection):
+            polys = [g for g in geom.geoms if isinstance(g, (Polygon, MultiPolygon))]
+            if not polys:
+                return None
+            return unary_union(polys)
+        return None
+
     before_poly = len(gdf)
-    gdf = gdf[gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].copy()
+    gdf = gdf.copy()
+    gdf["geometry"] = gdf["geometry"].apply(extract_polygons)
+    gdf = gdf[gdf["geometry"].notna() & ~gdf["geometry"].is_empty].copy()
     removed_non_polygon = before_poly - len(gdf)
     if removed_non_polygon:
-        print(f"Removed non-polygon geometries: {removed_non_polygon}")
+        print(f"Removed features with no polygon area: {removed_non_polygon}")
 
     keep_columns = [col for col in ["postnummer", "navn", "geometry"] if col in gdf.columns]
     if keep_columns:
