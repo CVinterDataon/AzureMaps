@@ -1,2 +1,5 @@
 # Geometry operations for clipping sea areas from GeoJSON polygons.
 shapely>=2.0,<3
+
+# Read DAGI GPKG and export to GeoJSON.
+geopandas>=1.0,<2

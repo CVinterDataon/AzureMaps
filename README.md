@@ -30,3 +30,13 @@ Eksempel:
 ```powershell
 python scripts/edit_geojson_postnummer_land_datascience.dk.py --input data/input/postnummerinddeling.geojson --land-mask data/input/kommuneinddeling.geojson --output data/output/postnummerinddeling_land.geojson
 ```
+
+## Konverter DAGI GPKG til GeoJSON
+
+Scriptet `scripts/edit_geojson_postnummer_land_DAGI.py` laeser DAGI GPKG-filen og gemmer en GeoJSON-fil i `data/output/`.
+
+Eksempel:
+
+```powershell
+python scripts/edit_geojson_postnummer_land_DAGI.py --input data/input/DAGI_V1_Postnummerinddeling_TotalDownload_gpkg_Current_645.gpkg --output data/output/postnummerinddeling_dagi.geojson
+```
