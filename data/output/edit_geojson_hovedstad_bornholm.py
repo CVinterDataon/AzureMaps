@@ -9,6 +9,8 @@ from typing import Iterable
 SCALE = 3.0
 GAP_NORTH_OF_CAPITAL = 0.20
 GAP_BORNHOLM_ABOVE_COPY = 0.20
+EXTRA_EAST_SHIFT = 0.45
+FRAME_PADDING = 0.08
 
 # User-defined capital municipalities (including common spelling variants).
 CAPITAL_MUNICIPALITIES = {
@@ -66,7 +68,7 @@ def is_capital_feature(feature: dict) -> bool:
         return False
 
     tokens = normalized_name.replace("-", " ").split()
-    if tokens and tokens[0] == "kobenhavn":
+    if tokens and tokens[0] == "koebenhavn":
         return True
 
     normalized_with_hyphen = "-".join(tokens)
@@ -139,6 +141,30 @@ def move_geometry(geometry: dict, dx: float, dy: float) -> None:
         pt[1] = pt[1] + dy
 
 
+def make_bbox_frame_feature(min_x: float, min_y: float, max_x: float, max_y: float, name: str, frame_type: str) -> dict:
+    ring = [
+        [min_x, min_y],
+        [max_x, min_y],
+        [max_x, max_y],
+        [min_x, max_y],
+        [min_x, min_y],
+    ]
+    return {
+        "type": "Feature",
+        "properties": {
+            "navn": name,
+            "label_dk": name,
+            "label_en": name,
+            "is_frame": True,
+            "frame_type": frame_type,
+        },
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [ring],
+        },
+    }
+
+
 def transform_geojson(input_path: Path, output_path: Path) -> None:
     with input_path.open("r", encoding="utf-8") as infile:
         data = json.load(infile)
@@ -164,7 +190,7 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
     source_center_x = (cap_xmin + cap_xmax) / 2.0
     scaled_center_x = (scaled_min_x + scaled_max_x) / 2.0
 
-    dx_copy = source_center_x - scaled_center_x
+    dx_copy = source_center_x - scaled_center_x + EXTRA_EAST_SHIFT
     dy_copy = (cap_ymax + GAP_NORTH_OF_CAPITAL) - scaled_min_y
 
     copied_capital_features = []
@@ -181,6 +207,7 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
 
     copied_bbox = bbox_of_features(copied_capital_features)
 
+    moved_bornholm_features = []
     if bornholm_features:
         bh_xmin, bh_ymin, bh_xmax, bh_ymax = bbox_of_features(bornholm_features)
         bh_center_x = (bh_xmin + bh_xmax) / 2.0
@@ -192,6 +219,29 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
         for feature in original_features:
             if is_bornholm_feature(feature) and feature.get("geometry"):
                 move_geometry(feature["geometry"], dx_bh, dy_bh)
+                moved_bornholm_features.append(feature)
+
+    copied_frame = make_bbox_frame_feature(
+        copied_bbox[0] - FRAME_PADDING,
+        copied_bbox[1] - FRAME_PADDING,
+        copied_bbox[2] + FRAME_PADDING,
+        copied_bbox[3] + FRAME_PADDING,
+        "Ramme - Forstørret Hovedstad",
+        "capital_copy",
+    )
+    data["features"].append(copied_frame)
+
+    if moved_bornholm_features:
+        bh_box = bbox_of_features(moved_bornholm_features)
+        bornholm_frame = make_bbox_frame_feature(
+            bh_box[0] - FRAME_PADDING,
+            bh_box[1] - FRAME_PADDING,
+            bh_box[2] + FRAME_PADDING,
+            bh_box[3] + FRAME_PADDING,
+            "Ramme - Bornholm",
+            "bornholm",
+        )
+        data["features"].append(bornholm_frame)
 
     data["features"].extend(copied_capital_features)
 
@@ -201,6 +251,7 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
 
     print(f"Capital features copied: {len(copied_capital_features)}")
     print(f"Bornholm features moved: {len(bornholm_features)}")
+    print(f"Frames added: {1 + (1 if moved_bornholm_features else 0)}")
     print(f"Output written to: {output_path}")
 
 

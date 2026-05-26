@@ -11,7 +11,3 @@ venv/
 .DS_Store
 Thumbs.db
 .vscode/*.log
-
-# Data outputs
-/data/output/*.geojson
-/data/output/*.json
