@@ -12,6 +12,7 @@ GAP_BORNHOLM_ABOVE_COPY = 0.20
 EXTRA_EAST_SHIFT = 0.45
 EXTRA_NORTH_SHIFT = 0.75
 FRAME_PADDING = 0.08
+FRAME_STROKE_WIDTH = 1
 
 # User-defined capital municipalities (including common spelling variants).
 CAPITAL_MUNICIPALITIES = {
@@ -158,10 +159,15 @@ def make_bbox_frame_feature(min_x: float, min_y: float, max_x: float, max_y: flo
             "label_en": name,
             "is_frame": True,
             "frame_type": frame_type,
+            "stroke": "#000000",
+            "stroke-width": FRAME_STROKE_WIDTH,
+            "stroke-opacity": 1,
+            "fill": "#000000",
+            "fill-opacity": 0,
         },
         "geometry": {
-            "type": "LineString",
-            "coordinates": ring,
+            "type": "Polygon",
+            "coordinates": [ring],
         },
     }
 
