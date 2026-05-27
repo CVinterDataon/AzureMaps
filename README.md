@@ -2,6 +2,8 @@
 
 Minimal workspace til scripts, der redigerer JSON/GeoJSON-filer.
 
+Alt indhold i dette repository er genereret med GitHub Copilot i Auto-mode.
+
 ## Struktur
 
 - `scripts/`: Python scripts til databehandling og redigering
