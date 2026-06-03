@@ -1,5 +1,8 @@
 """
-Genererer Streger.CSV med Path ID, Path order, SVG-flag og afstand til København.
+Genererer Streger.CSV med Path ID, Path order, SVG-flag (inkl. afstandstekst) og afstand til København.
+
+Hvert flag har viewBox="0 0 30 28": flag fylder 0–20, tekst med afstand sidder i 20–28.
+Branæs er i Sysslebæk, Mellemsverige → svensk flag.
 
 Kør fra roden af projektet:
   python exploratory/_generate_streger.py
@@ -9,149 +12,151 @@ import csv
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# Kompakte SVG-flag (inline, ingen linjeskift, ingen overflødige mellemrum)
+# Hjælpefunktion – pakker flag-SVG ind og tilføjer afstandstekst nedenunder.
+# Alle flag tegnes i en 30×20 boks; viewBox udvides til 30×28 for teksten.
 # ---------------------------------------------------------------------------
-FLAGS = {
-    # Tjekkiet – hvid/rød halvcirkel med blå trekant
+def _with_text(flag_body: str, distance: str) -> str:
+    text = (
+        f'<rect y="20" width="30" height="8" fill="#fff"/>'
+        f'<line x1="0" y1="20.5" x2="30" y2="20.5" stroke="#ccc" stroke-width="0.3"/>'
+        f'<text x="15" y="26" text-anchor="middle" '
+        f'font-size="4" font-family="sans-serif" fill="#333">{distance}</text>'
+    )
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 28">'
+        + flag_body
+        + text
+        + "</svg>"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Kompakte SVG-flag – kun geometri, ingen ydre <svg>-tag (tilføjes af _with_text).
+# Alle koordinater er skaleret til 30×20.
+# ---------------------------------------------------------------------------
+_FLAGS = {
+    # Tjekkiet – hvid/rød halvdel med blå trekant
     "CZ": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2">'
-        '<rect width="3" height="2" fill="#d7141a"/>'
-        '<rect width="3" height="1" fill="#fff"/>'
-        '<polygon points="0,0 1.5,1 0,2" fill="#11457e"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#d7141a"/>'
+        '<rect width="30" height="10" fill="#fff"/>'
+        '<polygon points="0,0 15,10 0,20" fill="#11457e"/>'
     ),
-    # Tyskland – sort/rød/guld
+    # Tyskland – sort/rød/guld vandrette striber
     "DE": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3">'
-        '<rect width="5" height="1" fill="#000"/>'
-        '<rect y="1" width="5" height="1" fill="#d00"/>'
-        '<rect y="2" width="5" height="1" fill="#fc0"/>'
-        "</svg>"
+        '<rect width="30" height="6.67" fill="#000"/>'
+        '<rect y="6.67" width="30" height="6.67" fill="#d00"/>'
+        '<rect y="13.34" width="30" height="6.66" fill="#fc0"/>'
     ),
     # Danmark – rød med hvidt nordisk kors
     "DK": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 28">'
-        '<rect width="37" height="28" fill="#c60c30"/>'
-        '<rect x="12" width="5" height="28" fill="#fff"/>'
-        '<rect y="11" width="37" height="6" fill="#fff"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#c60c30"/>'
+        '<rect x="10" width="4" height="20" fill="#fff"/>'
+        '<rect y="8" width="30" height="4" fill="#fff"/>'
     ),
     # Island – blå med hvid/rød nordisk kors
     "IS": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 18">'
-        '<rect width="25" height="18" fill="#003897"/>'
-        '<rect x="7" width="4" height="18" fill="#fff"/>'
-        '<rect y="7" width="25" height="4" fill="#fff"/>'
-        '<rect x="8" width="2" height="18" fill="#d72828"/>'
-        '<rect y="8" width="25" height="2" fill="#d72828"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#003897"/>'
+        '<rect x="8" width="5" height="20" fill="#fff"/>'
+        '<rect y="7.5" width="30" height="5" fill="#fff"/>'
+        '<rect x="9.5" width="2" height="20" fill="#d72828"/>'
+        '<rect y="9" width="30" height="2" fill="#d72828"/>'
     ),
-    # Ungarn – rød/hvid/grøn
+    # Sverige – blå med gult nordisk kors (bruges til Branæs/Norden)
+    "SE": (
+        '<rect width="30" height="20" fill="#006aa7"/>'
+        '<rect x="10" width="4" height="20" fill="#fecc02"/>'
+        '<rect y="8" width="30" height="4" fill="#fecc02"/>'
+    ),
+    # Ungarn – rød/hvid/grøn vandrette striber
     "HU": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2">'
-        '<rect width="3" height="0.667" fill="#ce2939"/>'
-        '<rect y="0.667" width="3" height="0.667" fill="#fff"/>'
-        '<rect y="1.334" width="3" height="0.667" fill="#477050"/>'
-        "</svg>"
+        '<rect width="30" height="6.67" fill="#ce2939"/>'
+        '<rect y="6.67" width="30" height="6.67" fill="#fff"/>'
+        '<rect y="13.34" width="30" height="6.66" fill="#477050"/>'
     ),
     # Italien – grøn/hvid/rød lodret
     "IT": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2">'
-        '<rect width="1" height="2" fill="#009246"/>'
-        '<rect x="1" width="1" height="2" fill="#fff"/>'
-        '<rect x="2" width="1" height="2" fill="#ce2b37"/>'
-        "</svg>"
+        '<rect width="10" height="20" fill="#009246"/>'
+        '<rect x="10" width="10" height="20" fill="#fff"/>'
+        '<rect x="20" width="10" height="20" fill="#ce2b37"/>'
     ),
-    # Grækenland – blå/hvide striber med kors i hjørnet
+    # Grækenland – blå/hvide striber + kors i øverste venstre hjørne
     "GR": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 18">'
-        '<rect width="27" height="18" fill="#0d5eaf"/>'
-        '<rect y="2" width="27" height="2" fill="#fff"/>'
-        '<rect y="6" width="27" height="2" fill="#fff"/>'
-        '<rect y="10" width="27" height="2" fill="#fff"/>'
-        '<rect y="14" width="27" height="2" fill="#fff"/>'
-        '<rect width="10" height="10" fill="#0d5eaf"/>'
-        '<rect x="4" width="2" height="10" fill="#fff"/>'
-        '<rect y="4" width="10" height="2" fill="#fff"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#0d5eaf"/>'
+        '<rect y="2.22" width="30" height="2.22" fill="#fff"/>'
+        '<rect y="6.66" width="30" height="2.22" fill="#fff"/>'
+        '<rect y="11.1" width="30" height="2.22" fill="#fff"/>'
+        '<rect y="15.54" width="30" height="2.22" fill="#fff"/>'
+        '<rect width="11" height="11.1" fill="#0d5eaf"/>'
+        '<rect x="4" width="3" height="11.1" fill="#fff"/>'
+        '<rect y="4.05" width="11" height="3" fill="#fff"/>'
     ),
-    # Portugal – grøn/rød med gul cirkel
+    # Portugal – grøn 2/5, rød 3/5, gul cirkel ved grænsen
     "PT": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3">'
-        '<rect width="2" height="3" fill="#046a38"/>'
-        '<rect x="2" width="3" height="3" fill="#da291c"/>'
-        '<circle cx="2" cy="1.5" r="0.55" fill="#f7d117"/>'
-        "</svg>"
+        '<rect width="12" height="20" fill="#046a38"/>'
+        '<rect x="12" width="18" height="20" fill="#da291c"/>'
+        '<circle cx="12" cy="10" r="3.5" fill="#f7d117"/>'
     ),
-    # Kroatien – rød/hvid/blå
+    # Kroatien – rød/hvid/blå vandrette striber
     "HR": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2">'
-        '<rect width="3" height="0.667" fill="#ff0000"/>'
-        '<rect y="0.667" width="3" height="0.667" fill="#fff"/>'
-        '<rect y="1.334" width="3" height="0.667" fill="#171796"/>'
-        "</svg>"
+        '<rect width="30" height="6.67" fill="#ff0000"/>'
+        '<rect y="6.67" width="30" height="6.67" fill="#fff"/>'
+        '<rect y="13.34" width="30" height="6.66" fill="#171796"/>'
     ),
-    # Polen – hvid/rød
+    # Polen – hvid/rød vandrette striber
     "PL": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2">'
-        '<rect width="3" height="1" fill="#fff"/>'
-        '<rect y="1" width="3" height="1" fill="#dc143c"/>'
-        "</svg>"
+        '<rect width="30" height="10" fill="#fff"/>'
+        '<rect y="10" width="30" height="10" fill="#dc143c"/>'
     ),
     # Albanien – rød med forenklet dobbeltørn
     "AL": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 7">'
-        '<rect width="10" height="7" fill="#e41e20"/>'
-        '<path d="M5 1L3.5 2L3 1.5L3.5 3L2.5 3.5L4 3.5L3.5 5L5 4L6.5 5L6 3.5L7.5 3.5L6.5 3L7 1.5L6.5 2Z" fill="#000"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#e41e20"/>'
+        '<path d="M15 3L11 6L9 4.5L10.5 8.5L7.5 10.5L12 10.5'
+        'L10.5 15L15 12L19.5 15L18 10.5L22.5 10.5'
+        'L19.5 8.5L21 4.5L19 6Z" fill="#000"/>'
     ),
     # Norge – rød med blå/hvid nordisk kors
     "NO": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 16">'
-        '<rect width="22" height="16" fill="#ef2b2d"/>'
-        '<rect x="6" width="4" height="16" fill="#fff"/>'
-        '<rect y="6" width="22" height="4" fill="#fff"/>'
-        '<rect x="7" width="2" height="16" fill="#002868"/>'
-        '<rect y="7" width="22" height="2" fill="#002868"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#ef2b2d"/>'
+        '<rect x="11" width="5" height="20" fill="#fff"/>'
+        '<rect y="7.5" width="30" height="5" fill="#fff"/>'
+        '<rect x="12" width="3" height="20" fill="#002868"/>'
+        '<rect y="9" width="30" height="3" fill="#002868"/>'
     ),
-    # Sverige – blå med gult nordisk kors (bruges til "Norden")
-    "SE": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 10">'
-        '<rect width="16" height="10" fill="#006aa7"/>'
-        '<rect x="5" width="2" height="10" fill="#fecc02"/>'
-        '<rect y="4" width="16" height="2" fill="#fecc02"/>'
-        "</svg>"
-    ),
-    # UK / Skotsk saltire (Edinburgh er i Skotland)
+    # UK / Skotsk saltire – blå med hvide diagonale kors (Edinburgh er i Skotland)
     "GB": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3">'
-        '<rect width="5" height="3" fill="#003078"/>'
-        '<line x1="0" y1="0" x2="5" y2="3" stroke="#fff" stroke-width="0.6"/>'
-        '<line x1="5" y1="0" x2="0" y2="3" stroke="#fff" stroke-width="0.6"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#003078"/>'
+        '<line x1="0" y1="0" x2="30" y2="20" stroke="#fff" stroke-width="4"/>'
+        '<line x1="30" y1="0" x2="0" y2="20" stroke="#fff" stroke-width="4"/>'
     ),
-    # Nordmakedonien – rød med gul sol og stråler
+    # Nordmakedonien – rød med gul sol med 8 stråler
     "MK": (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 1">'
-        '<rect width="2" height="1" fill="#ce2028"/>'
-        '<circle cx="1" cy="0.5" r="0.12" fill="#f7d117"/>'
-        '<line x1="1" y1="0" x2="1" y2="1" stroke="#f7d117" stroke-width="0.06"/>'
-        '<line x1="0.5" y1="0.5" x2="1.5" y2="0.5" stroke="#f7d117" stroke-width="0.06"/>'
-        '<line x1="0.646" y1="0.146" x2="1.354" y2="0.854" stroke="#f7d117" stroke-width="0.06"/>'
-        '<line x1="1.354" y1="0.146" x2="0.646" y2="0.854" stroke="#f7d117" stroke-width="0.06"/>'
-        "</svg>"
+        '<rect width="30" height="20" fill="#ce2028"/>'
+        '<circle cx="15" cy="10" r="3" fill="#f7d117"/>'
+        '<line x1="15" y1="0" x2="15" y2="20" stroke="#f7d117" stroke-width="1.5"/>'
+        '<line x1="0" y1="10" x2="30" y2="10" stroke="#f7d117" stroke-width="1.5"/>'
+        '<line x1="0" y1="0" x2="30" y2="20" stroke="#f7d117" stroke-width="1.5"/>'
+        '<line x1="30" y1="0" x2="0" y2="20" stroke="#f7d117" stroke-width="1.5"/>'
+        '<line x1="0" y1="5" x2="30" y2="15" stroke="#f7d117" stroke-width="1.5"/>'
+        '<line x1="30" y1="5" x2="0" y2="15" stroke="#f7d117" stroke-width="1.5"/>'
+        '<line x1="7" y1="0" x2="23" y2="20" stroke="#f7d117" stroke-width="1.5"/>'
+        '<line x1="23" y1="0" x2="7" y2="20" stroke="#f7d117" stroke-width="1.5"/>'
     ),
 }
 
+
+def flag_svg(code: str, distance: str) -> str:
+    """Bygger et komplet SVG med flag (30×20) og afstandstekst nedenunder (30×28)."""
+    return _with_text(_FLAGS[code], distance)
+
+
 # ---------------------------------------------------------------------------
-# Destinationer: (Sted, landekode, afstand fra København i km)
-# Afstande er beregnet som luftlinjestrækning (haversine).
+# Destinationer: (Sted, landekode, afstand fra København – luftlinje/haversine)
+# Branæs = Sysslebæk, Mellemsverige → SE, ~480 km
 # ---------------------------------------------------------------------------
 DESTINATIONS = [
     ("Prag",          "CZ", "630 km"),
     ("Berlin",        "DE", "350 km"),
-    ("Branæs",        "DK", "280 km"),
+    ("Branæs",        "SE", "480 km"),
     ("Island",        "IS", "2 100 km"),
     ("Budapest",      "HU", "1 010 km"),
     ("Italien",       "IT", "1 530 km"),
@@ -162,14 +167,10 @@ DESTINATIONS = [
     ("Tirana",        "AL", "1 680 km"),
     ("Fyn",           "DK", "140 km"),
     ("Norden",        "SE", "520 km"),
-    ("Island",        "IS", "2 100 km"),
     ("Hamborg",       "DE", "290 km"),
-    ("Berlin",        "DE", "350 km"),
     ("Edinburg",      "GB", "980 km"),
-    ("Island",        "IS", "2 100 km"),
     ("Longyearbyen",  "NO", "2 500 km"),
     ("Samsø",         "DK", "125 km"),
-    ("Prag",          "CZ", "630 km"),
     ("Skopje",        "MK", "1 650 km"),
 ]
 
@@ -180,7 +181,7 @@ def main() -> None:
     rows: list[list] = [["Sted", "Path ID", "Path order", "SVG", "Afstand"]]
 
     for path_id, (name, flag_code, distance) in enumerate(DESTINATIONS, start=1):
-        rows.append([name, path_id, 1, FLAGS[flag_code], distance])
+        rows.append([name, path_id, 1, flag_svg(flag_code, distance), distance])
         rows.append(["København", path_id, 0, "", ""])
         rows.append(["Aarhus",    path_id, 2, "", ""])
 
