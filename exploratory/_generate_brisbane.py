@@ -72,10 +72,13 @@ def direction_deg(capital_lon: float, capital_lat: float) -> float:
     """
     Returnerer vinklen i grader fra hovedstaden mod Brisbane på Mercator-kortet.
     0° = højre (øst), 90° = ned (syd), 180° = venstre (vest), 270° = op (nord).
+
+    screen_dy er i Mercator-radianer og skaleres til grader (×180/π) så
+    akserne er sammenlignelige med longitude-grader.
     """
     dx = BRISBANE_LON - capital_lon
     # screen_dy positiv = Brisbane er syd for (under) hovedstaden på kortet
-    screen_dy = _mercator_y(capital_lat) - _mercator_y(BRISBANE_LAT)
+    screen_dy = (_mercator_y(capital_lat) - _mercator_y(BRISBANE_LAT)) * (180 / math.pi)
     return math.degrees(math.atan2(screen_dy, dx))
 
 
@@ -231,7 +234,7 @@ CAPITALS = [
     ("Bern",                     "Switzerland",                  46.95,   7.45),
     ("Kyiv",                     "Ukraine",                      50.45,  30.52),
     ("London",                   "United Kingdom",               51.51,  -0.13),
-    ("Vatican City",             "Vatican",                      41.90,  12.45),
+    # Vatican udeladt – ikke IOC-medlem, deltager ikke i OL
     # ── Nord- og Mellemamerika + Caribien ───────────────────────────────────
     ("Saint John's",             "Antigua and Barbuda",          17.12, -61.85),
     ("Nassau",                   "Bahamas",                      25.08, -77.35),
@@ -279,9 +282,9 @@ CAPITALS = [
     ("Wellington",               "New Zealand",                 -41.29, 174.78),
     ("Ngerulmud",                "Palau",                         7.50, 134.64),
     ("Port Moresby",             "Papua New Guinea",             -9.43, 147.18),
-    ("Apia",                     "Samoa",                       -13.83,-171.77),
+    # Samoa udeladt (ikke med i 2032-OL-scenariet)
     ("Honiara",                  "Solomon Islands",              -9.43, 159.95),
-    ("Nuku'alofa",               "Tonga",                       -21.13,-175.22),
+    # Tonga udeladt (ikke med i 2032-OL-scenariet)
     ("Funafuti",                 "Tuvalu",                       -8.52, 179.22),
     ("Port Vila",                "Vanuatu",                     -17.74, 168.33),
 ]
