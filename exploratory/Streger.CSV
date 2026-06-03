@@ -1,0 +1,67 @@
+﻿Sted,Path ID,Path order,SVG,Afstand
+Prag,1,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 3 2""><rect width=""3"" height=""2"" fill=""#d7141a""/><rect width=""3"" height=""1"" fill=""#fff""/><polygon points=""0,0 1.5,1 0,2"" fill=""#11457e""/></svg>",630 km
+København,1,0,,
+Aarhus,1,2,,
+Berlin,2,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 5 3""><rect width=""5"" height=""1"" fill=""#000""/><rect y=""1"" width=""5"" height=""1"" fill=""#d00""/><rect y=""2"" width=""5"" height=""1"" fill=""#fc0""/></svg>",350 km
+København,2,0,,
+Aarhus,2,2,,
+Branæs,3,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 37 28""><rect width=""37"" height=""28"" fill=""#c60c30""/><rect x=""12"" width=""5"" height=""28"" fill=""#fff""/><rect y=""11"" width=""37"" height=""6"" fill=""#fff""/></svg>",280 km
+København,3,0,,
+Aarhus,3,2,,
+Island,4,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 25 18""><rect width=""25"" height=""18"" fill=""#003897""/><rect x=""7"" width=""4"" height=""18"" fill=""#fff""/><rect y=""7"" width=""25"" height=""4"" fill=""#fff""/><rect x=""8"" width=""2"" height=""18"" fill=""#d72828""/><rect y=""8"" width=""25"" height=""2"" fill=""#d72828""/></svg>",2 100 km
+København,4,0,,
+Aarhus,4,2,,
+Budapest,5,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 3 2""><rect width=""3"" height=""0.667"" fill=""#ce2939""/><rect y=""0.667"" width=""3"" height=""0.667"" fill=""#fff""/><rect y=""1.334"" width=""3"" height=""0.667"" fill=""#477050""/></svg>",1 010 km
+København,5,0,,
+Aarhus,5,2,,
+Italien,6,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 3 2""><rect width=""1"" height=""2"" fill=""#009246""/><rect x=""1"" width=""1"" height=""2"" fill=""#fff""/><rect x=""2"" width=""1"" height=""2"" fill=""#ce2b37""/></svg>",1 530 km
+København,6,0,,
+Aarhus,6,2,,
+Grækenland,7,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 27 18""><rect width=""27"" height=""18"" fill=""#0d5eaf""/><rect y=""2"" width=""27"" height=""2"" fill=""#fff""/><rect y=""6"" width=""27"" height=""2"" fill=""#fff""/><rect y=""10"" width=""27"" height=""2"" fill=""#fff""/><rect y=""14"" width=""27"" height=""2"" fill=""#fff""/><rect width=""10"" height=""10"" fill=""#0d5eaf""/><rect x=""4"" width=""2"" height=""10"" fill=""#fff""/><rect y=""4"" width=""10"" height=""2"" fill=""#fff""/></svg>",2 140 km
+København,7,0,,
+Aarhus,7,2,,
+Portugal,8,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 5 3""><rect width=""2"" height=""3"" fill=""#046a38""/><rect x=""2"" width=""3"" height=""3"" fill=""#da291c""/><circle cx=""2"" cy=""1.5"" r=""0.55"" fill=""#f7d117""/></svg>",2 500 km
+København,8,0,,
+Aarhus,8,2,,
+Kroatien,9,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 3 2""><rect width=""3"" height=""0.667"" fill=""#ff0000""/><rect y=""0.667"" width=""3"" height=""0.667"" fill=""#fff""/><rect y=""1.334"" width=""3"" height=""0.667"" fill=""#171796""/></svg>",1 120 km
+København,9,0,,
+Aarhus,9,2,,
+Krakow,10,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 3 2""><rect width=""3"" height=""1"" fill=""#fff""/><rect y=""1"" width=""3"" height=""1"" fill=""#dc143c""/></svg>",800 km
+København,10,0,,
+Aarhus,10,2,,
+Tirana,11,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 10 7""><rect width=""10"" height=""7"" fill=""#e41e20""/><path d=""M5 1L3.5 2L3 1.5L3.5 3L2.5 3.5L4 3.5L3.5 5L5 4L6.5 5L6 3.5L7.5 3.5L6.5 3L7 1.5L6.5 2Z"" fill=""#000""/></svg>",1 680 km
+København,11,0,,
+Aarhus,11,2,,
+Fyn,12,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 37 28""><rect width=""37"" height=""28"" fill=""#c60c30""/><rect x=""12"" width=""5"" height=""28"" fill=""#fff""/><rect y=""11"" width=""37"" height=""6"" fill=""#fff""/></svg>",140 km
+København,12,0,,
+Aarhus,12,2,,
+Norden,13,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 16 10""><rect width=""16"" height=""10"" fill=""#006aa7""/><rect x=""5"" width=""2"" height=""10"" fill=""#fecc02""/><rect y=""4"" width=""16"" height=""2"" fill=""#fecc02""/></svg>",520 km
+København,13,0,,
+Aarhus,13,2,,
+Island,14,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 25 18""><rect width=""25"" height=""18"" fill=""#003897""/><rect x=""7"" width=""4"" height=""18"" fill=""#fff""/><rect y=""7"" width=""25"" height=""4"" fill=""#fff""/><rect x=""8"" width=""2"" height=""18"" fill=""#d72828""/><rect y=""8"" width=""25"" height=""2"" fill=""#d72828""/></svg>",2 100 km
+København,14,0,,
+Aarhus,14,2,,
+Hamborg,15,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 5 3""><rect width=""5"" height=""1"" fill=""#000""/><rect y=""1"" width=""5"" height=""1"" fill=""#d00""/><rect y=""2"" width=""5"" height=""1"" fill=""#fc0""/></svg>",290 km
+København,15,0,,
+Aarhus,15,2,,
+Berlin,16,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 5 3""><rect width=""5"" height=""1"" fill=""#000""/><rect y=""1"" width=""5"" height=""1"" fill=""#d00""/><rect y=""2"" width=""5"" height=""1"" fill=""#fc0""/></svg>",350 km
+København,16,0,,
+Aarhus,16,2,,
+Edinburg,17,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 5 3""><rect width=""5"" height=""3"" fill=""#003078""/><line x1=""0"" y1=""0"" x2=""5"" y2=""3"" stroke=""#fff"" stroke-width=""0.6""/><line x1=""5"" y1=""0"" x2=""0"" y2=""3"" stroke=""#fff"" stroke-width=""0.6""/></svg>",980 km
+København,17,0,,
+Aarhus,17,2,,
+Island,18,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 25 18""><rect width=""25"" height=""18"" fill=""#003897""/><rect x=""7"" width=""4"" height=""18"" fill=""#fff""/><rect y=""7"" width=""25"" height=""4"" fill=""#fff""/><rect x=""8"" width=""2"" height=""18"" fill=""#d72828""/><rect y=""8"" width=""25"" height=""2"" fill=""#d72828""/></svg>",2 100 km
+København,18,0,,
+Aarhus,18,2,,
+Longyearbyen,19,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 22 16""><rect width=""22"" height=""16"" fill=""#ef2b2d""/><rect x=""6"" width=""4"" height=""16"" fill=""#fff""/><rect y=""6"" width=""22"" height=""4"" fill=""#fff""/><rect x=""7"" width=""2"" height=""16"" fill=""#002868""/><rect y=""7"" width=""22"" height=""2"" fill=""#002868""/></svg>",2 500 km
+København,19,0,,
+Aarhus,19,2,,
+Samsø,20,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 37 28""><rect width=""37"" height=""28"" fill=""#c60c30""/><rect x=""12"" width=""5"" height=""28"" fill=""#fff""/><rect y=""11"" width=""37"" height=""6"" fill=""#fff""/></svg>",125 km
+København,20,0,,
+Aarhus,20,2,,
+Prag,21,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 3 2""><rect width=""3"" height=""2"" fill=""#d7141a""/><rect width=""3"" height=""1"" fill=""#fff""/><polygon points=""0,0 1.5,1 0,2"" fill=""#11457e""/></svg>",630 km
+København,21,0,,
+Aarhus,21,2,,
+Skopje,22,1,"<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 2 1""><rect width=""2"" height=""1"" fill=""#ce2028""/><circle cx=""1"" cy=""0.5"" r=""0.12"" fill=""#f7d117""/><line x1=""1"" y1=""0"" x2=""1"" y2=""1"" stroke=""#f7d117"" stroke-width=""0.06""/><line x1=""0.5"" y1=""0.5"" x2=""1.5"" y2=""0.5"" stroke=""#f7d117"" stroke-width=""0.06""/><line x1=""0.646"" y1=""0.146"" x2=""1.354"" y2=""0.854"" stroke=""#f7d117"" stroke-width=""0.06""/><line x1=""1.354"" y1=""0.146"" x2=""0.646"" y2=""0.854"" stroke=""#f7d117"" stroke-width=""0.06""/></svg>",1 650 km
+København,22,0,,
+Aarhus,22,2,,
