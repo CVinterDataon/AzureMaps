@@ -1,7 +1,8 @@
 """
-Genererer Streger.CSV med Path ID, Path order, SVG-flag (inkl. afstandstekst) og afstand til København.
+Genererer Streger.CSV med to separate SVG-kolonner:
+  - SVG_Flag   : kun landeflag (viewBox 30×20), ingen tekst
+  - SVG_Afstand: kun afstandstekst som SVG (viewBox 60×14), intet flag
 
-Hvert flag har viewBox="0 0 30 28": flag fylder 0–20, tekst med afstand sidder i 20–28.
 Branæs er i Sysslebæk, Mellemsverige → svensk flag.
 
 Kør fra roden af projektet:
@@ -12,21 +13,25 @@ import csv
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# Hjælpefunktion – pakker flag-SVG ind og tilføjer afstandstekst nedenunder.
-# Alle flag tegnes i en 30×20 boks; viewBox udvides til 30×28 for teksten.
+# SVG-byggere
 # ---------------------------------------------------------------------------
-def _with_text(flag_body: str, distance: str) -> str:
-    text = (
-        f'<rect y="20" width="30" height="8" fill="#fff"/>'
-        f'<line x1="0" y1="20.5" x2="30" y2="20.5" stroke="#ccc" stroke-width="0.3"/>'
-        f'<text x="15" y="26" text-anchor="middle" '
-        f'font-size="4" font-family="sans-serif" fill="#333">{distance}</text>'
-    )
+def flag_only_svg(flag_body: str) -> str:
+    """Flag uden tekst – viewBox 30×20."""
     return (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 28">'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">'
         + flag_body
-        + text
         + "</svg>"
+    )
+
+
+def distance_only_svg(distance: str) -> str:
+    """Afstandstekst uden flag – viewBox 60×14, font-size 9."""
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 14">'
+        '<rect width="60" height="14" fill="#f7f7f7" rx="2"/>'
+        f'<text x="30" y="10" text-anchor="middle" dominant-baseline="auto" '
+        f'font-size="9" font-family="sans-serif" font-weight="bold" fill="#222">{distance}</text>'
+        "</svg>"
     )
 
 
@@ -144,9 +149,9 @@ _FLAGS = {
 }
 
 
-def flag_svg(code: str, distance: str) -> str:
-    """Bygger et komplet SVG med flag (30×20) og afstandstekst nedenunder (30×28)."""
-    return _with_text(_FLAGS[code], distance)
+def flag_svg(code: str) -> str:
+    """Bygger et komplet SVG med kun flag (30×20)."""
+    return flag_only_svg(_FLAGS[code])
 
 
 # ---------------------------------------------------------------------------
@@ -178,12 +183,12 @@ OUTPUT = Path(__file__).parent / "Streger.CSV"
 
 
 def main() -> None:
-    rows: list[list] = [["Sted", "Path ID", "Path order", "SVG", "Afstand"]]
+    rows: list[list] = [["Sted", "Path ID", "Path order", "SVG_Flag", "SVG_Afstand", "Afstand"]]
 
     for path_id, (name, flag_code, distance) in enumerate(DESTINATIONS, start=1):
-        rows.append([name, path_id, 1, flag_svg(flag_code, distance), distance])
-        rows.append(["København", path_id, 0, "", ""])
-        rows.append(["Aarhus",    path_id, 2, "", ""])
+        rows.append([name, path_id, 1, flag_svg(flag_code), distance_only_svg(distance), distance])
+        rows.append(["København", path_id, 0, "", "", ""])
+        rows.append(["Aarhus",    path_id, 2, "", "", ""])
 
     with OUTPUT.open("w", newline="", encoding="utf-8-sig") as f:
         writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
