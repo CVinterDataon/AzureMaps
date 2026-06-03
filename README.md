@@ -7,7 +7,7 @@ Alt indhold i dette repository er genereret med GitHub Copilot i Auto-mode.
 ## Struktur
 
 - `scripts/`: Python scripts til databehandling og redigering
-- `data/input/`: inputfiler (GeoJSON og GPKG) — store filer er ikke inkluderet i repo, se nedenfor
+- `data/input/`: inputfiler (GeoJSON) — store filer er ikke inkluderet i repo, se nedenfor
 - `data/output/`: genererede outputfiler
 - `tests/`: testfiler
 
@@ -23,54 +23,24 @@ pip install -r requirements.txt
 
 Store inputfiler er ikke inkluderet i Git. Læg dem i `data/input/` med præcis de filnavne, der er angivet herunder.
 
-### Kommuneredigering
-
-Bruges af: `edit_geojson_hovedstad_bornholm.py`, `edit_geojson_postnummer_land_datascience.dk.py`, `create_trip_locations.py`
-
-| Fil | Kilde |
-|-----|-------|
-| `kommuneinddeling.geojson` | [datascience.dk – Kommuner](https://www.datascience.dk/kommuneinddeling-i-geojson) |
-
-### Postnummerredigering (datascience.dk-kilde)
-
-Bruges af: `edit_geojson_postnummer_land_datascience.dk.py`
-
-| Fil | Kilde |
-|-----|-------|
-| `postnummerinddeling.geojson` | [datascience.dk – Postnumre](https://www.datascience.dk/postnummerinddeling-i-geojson) |
-| `kommuneinddeling.geojson` | Se ovenfor |
-
-### Postnummerredigering (DAGI-kilde)
-
-Bruges af: `edit_geojson_postnummer_land_DAGI.py`
-
-| Fil | Kilde | Download-navn |
-|-----|-------|---------------|
-| `DAGI_V2_Postnummerinddeling_500000_TotalDownload_gpkg_Current_118.gpkg` | [Dataforsyningen – DAGI](https://dataforsyningen.dk/data/3978) → *Postnummerinddeling* → *GeoPackage* | Omdøb til det præcise filnavn |
-| `kommuneinddeling.geojson` | Se ovenfor | |
-
-> **Tip:** scriptet falder automatisk tilbage til `DAGI_V1_...` hvis V2-filen ikke findes.
+| Fil | Bruges af | Kilde |
+|-----|-----------|-------|
+| `kommuneinddeling.geojson` | alle scripts | [datascience.dk – Kommuner](https://www.datascience.dk/kommuneinddeling-i-geojson) |
+| `postnummerinddeling.geojson` | `edit_geojson_postnummer_land_datascience.dk.py` | [datascience.dk – Postnumre](https://www.datascience.dk/postnummerinddeling-i-geojson) |
 
 ---
 
 ## Fjern hav-arealer fra postnumre
 
-Scriptet `scripts/edit_geojson_postnummer_land_datascience.dk.py` klipper postnummergeometrier med kommunegeometrier som landmaske.
-Det fjerner de store udtræk i havet, som ellers kan give unaturlige polygoner.
+`scripts/edit_geojson_postnummer_land_datascience.dk.py` klipper postnummergeometrier med kommunegeometrier som landmaske og fjerner de store vandarealer på kystpostnumre.
 
 ```powershell
 python scripts/edit_geojson_postnummer_land_datascience.dk.py --input data/input/postnummerinddeling.geojson --land-mask data/input/kommuneinddeling.geojson --output data/output/postnummerinddeling_land.geojson
 ```
 
-## Konverter DAGI GPKG til GeoJSON
-
-Scriptet `scripts/edit_geojson_postnummer_land_DAGI.py` læser DAGI GPKG-filen og gemmer en GeoJSON-fil i `data/output/`.
-
-```powershell
-python scripts/edit_geojson_postnummer_land_DAGI.py --input data/input/DAGI_V2_Postnummerinddeling_500000_TotalDownload_gpkg_Current_118.gpkg --output data/output/postnummerinddeling_dagi.geojson
-```
-
 ## Udtræk hovedstadsregion og Bornholm
+
+`scripts/edit_geojson_hovedstad_bornholm.py` udtrækker kommunerne i Hovedstadsregionen og Bornholm fra `kommuneinddeling.geojson` og tilføjer normaliserede navne og regionslabels.
 
 ```powershell
 python scripts/edit_geojson_hovedstad_bornholm.py
