@@ -8,7 +8,7 @@ from typing import Iterable
 
 SCALE = 2.4  # Skaleringsfaktor for kopien af hovedstadskommunerne.
 GAP_NORTH_OF_CAPITAL = -0.4  # Lodret afstand mellem original Hovedstaden og den forstørrede kopi.
-GAP_BORNHOLM_ABOVE_COPY = 0.20  # Lodret afstand mellem forstørret Hovedstaden og flyttet Bornholm.
+BORNHOLM_SOUTH_OF_CAPITAL = 0.65  # Grader syd for Hovedstadens sydlige kant (under København).
 EXTRA_EAST_SHIFT = 0.45  # Ekstra forskydning mod øst for kopien af hovedstadskommunerne.
 EXTRA_NORTH_SHIFT = 0.75  # Ekstra forskydning mod nord for at undgå overlap med Nordsjælland.
 FRAME_PADDING = 0.08  # Margin mellem geometri og ramme.
@@ -272,10 +272,12 @@ def transform_geojson(input_path: Path, output_path: Path) -> None:
     if bornholm_features:
         bh_xmin, bh_ymin, bh_xmax, bh_ymax = bbox_of_features(bornholm_features)
         bh_center_x = (bh_xmin + bh_xmax) / 2.0
-        copied_center_x = (copied_bbox[0] + copied_bbox[2]) / 2.0
+        bh_center_y = (bh_ymin + bh_ymax) / 2.0
 
-        dx_bh = copied_center_x - bh_center_x
-        dy_bh = (copied_bbox[3] + GAP_BORNHOLM_ABOVE_COPY) - bh_ymin
+        # Placer Bornholm syd for København; højrekant flugter med højrekant af Hovedstadskopien.
+        dx_bh = copied_bbox[2] - bh_xmax
+        target_center_y = cap_ymin - BORNHOLM_SOUTH_OF_CAPITAL
+        dy_bh = target_center_y - bh_center_y
 
         for feature in original_features:
             if is_bornholm_feature(feature) and feature.get("geometry"):
